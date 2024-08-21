@@ -15,12 +15,45 @@ if ($null -ne $directoryToUse) {
   $directoryToUse = $directoryToUse.Replace("`"","'")
 }
 
-Write-Host "Simfile Tool (6/5/2024) by sukibaby :)"
+$ARTARRAY = @(
+    @(
+        "                                                ",
+        "             (       (           )         (   ",
+        "   (     )   )\ ) (  )\  (    ( /(         )\  ",
+        " ( )\   (   (()/( )\((_)))\   )\())(    ( ((_) ",
+        " )((_)  )\  '/(_)|(_)_ /((_) (_))/ )\   )\ _   ",
+        "((_|_)_((_))(_) _|(_) (_))   | |_ ((_) ((_) |  ",
+        "(_-< | '  \()|  _|| | / -_)  |  _/ _ \/ _ \ |  ",
+        "/__/_|_|_|_| |_|  |_|_\___|   \__\___/\___/_|  "
+    ),
+    @(
+        "                      _                _",
+        "                /)   //     _/_       //",
+        " _   o ______  // o // _    /  __ __ //",
+        "/_)_<_/ / / <_//_<_</_</_  <__(_)(_)</_",
+        "             />",
+        "            </"
+    ),
+    @(
+        "____ _ _  _ ____ _ _    ____    ___ ____ ____ _    ",
+        "[__  | |\/| |___ | |    |___     |  |  | |  | |    ",
+        "___] | |  | |    | |___ |___     |  |__| |__| |___"
+    )
+)
+
+$randomArt = Get-Random -InputObject $ARTARRAY
+
+foreach ($line in $randomArt) {
+    Write-Host $line
+}
+
+Write-Host " ~ Version 8/20/2024 ~"
 Write-Host "Check for new versions at:"
 Write-Host "https://github.com/sukibaby/simfile-tool"
 Write-Host ""
 Write-Host "Be sure to make a backup of your files first."
 Write-Host ""
+
 #endregion
 
 #region FUNCTION Get-Directory
@@ -174,18 +207,37 @@ function Update-Offset {
 }
 
 function Update-File {
-  param($file,$operations)
-  $content = Get-Content -LiteralPath $file.FullName
-  foreach ($operation in $operations) {
-    for ($i = 0; $i -lt $content.Length; $i++) {
-      if ($content[$i] -match $operation.Pattern) {
-        Write-Host "Replacing '$($content[$i])' with '$($operation.Replacement)'"
-        $content[$i] = $content[$i] -replace $operation.Pattern, $operation.Replacement
-      }
+    param($file, $operations)
+    $content = Get-Content -LiteralPath $file.FullName
+    $contentModified = $false
+
+    foreach ($operation in $operations) {
+        $pattern = $operation.Pattern
+        $replacement = $operation.Replacement
+        $appendIfNotFound = $operation.AppendIfNotFound -or $false
+
+        $found = $false
+        for ($i = 0; $i -lt $content.Length; $i++) {
+            if ($content[$i] -match $pattern) {
+                Write-Host "Replacing '$($content[$i])' with '$replacement'"
+                $content[$i] = $content[$i] -replace $pattern, $replacement
+                $found = $true
+                $contentModified = $true
+            }
+        }
+
+        if ($appendIfNotFound -and -not $found) {
+            Write-Host "Appending '$replacement' to the file."
+            $content += $replacement
+            $contentModified = $true
+        }
     }
-  }
-  Set-Content -LiteralPath $file.FullName -Value $content
+
+    if ($contentModified) {
+        Set-Content -LiteralPath $file.FullName -Value $content
+    }
 }
+
 #endregion
 
 #region FUNCTION Check-FilePaths, Remove-OldFiles
@@ -363,15 +415,13 @@ Draw-Separator
 $operations = @()
 
 $wannaMessage = @"
-  The following section changes the text values inside the   
-  simfile. It won't move any files.                          
-  For example, if you plan to have a banner called           
-  'banner.png' in all your song directories,                 
-  you would enter banner.png when prompted. You can change   
-  the banner, CD title, background, step artist, and credit  
-  fields here.                                               
-                                                                 
+  The following section changes the text values inside the simfile. It won't
+  move any files. For example, if you plan to have a banner called 'banner.png'
+  in all your song directories, you would enter banner.png when prompted. You
+  can change the banner, CD title, background, step artist, and credit fields
+  here.
 "@
+
 Write-Host $wannaMessage
 $wannaModify = Read-Host -Prompt 'Would you like to modify any of these values? (yes/no, default is no)'
 if ($wannaModify -eq 'yes') {
@@ -414,6 +464,13 @@ if ($wannaModify -eq 'yes') {
     $operations += @{ Pattern = '^#CREDIT:.*?;'; Replacement = "#CREDIT:$creditValue;" }
   }
 
+    Write-Host ""
+    $addGenre = Read-Host -Prompt 'Would you like to apply a genre to these files? (yes/no, default is no)'
+    if ($addGenre -eq 'yes') {
+        $GenrePrompt = Read-Host -Prompt 'Enter the genre'
+        $operations += @{ Pattern = '^#GENRE:.*?;'; Replacement = "#GENRE:$GenrePrompt;"; AppendIfNotFound = $true }
+    }
+
   $files = Get-Files -dir $directoryToUse -Recurse $recurse
   Write-Host ""
   $confirmation = Read-Host "Are you sure you want to apply changes? (yes/no, default is no)"
@@ -443,18 +500,15 @@ Draw-Separator
 #endregion
 
 #region USER INPUT Portable Filenames
-$renameFilesForSharingMessage = @"
-  If you upload files to a sharing     
-  service, it might change the file    
-  names. This can be problematic if    
-  your file names contain things like  
-  spaces, parentheses, etc., to        
-  prevent this your files can be       
-  renamed, and your simfiles can be    
-  automatically accordingly, if you    
-  select `yes` here.                   
+$wannaMessage = @"
+  The following section changes the text values inside the simfile. It won't
+  move any files. For example, if you plan to have a banner called 'banner.png'
+  in all your song directories, you would enter banner.png when prompted. You
+  can change the banner, CD title, background, step artist, and credit fields
+  here.
 
 "@
+
 Write-Host $renameFilesForSharingMessage
 $renameFilesForSharingConfirm = Read-Host -Prompt 'Would you like to check for spaces and special characters and rename the files? (yes/no, default is no)'
 if ($renameFilesForSharingConfirm -eq 'yes') {
@@ -468,4 +522,9 @@ Draw-Separator
 #region END OF PROGRAM
 # Tell the user everything succeeded.
 Write-Host "All done :)"
+Write-Host ""
+Write-Host "~hint~ If you're finalizing a pack, here is an easy way to normalize a batch of audio files:"
+Write-Host "https://www.youtube.com/watch?v=ML7YkFLlL1U"
+Write-Host "You can use the 'Batch File/Item Converter' to normalize all your oggs volumes at once ;)"
+Write-Host ""
 #endregion
