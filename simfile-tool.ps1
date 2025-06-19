@@ -12,7 +12,7 @@ param(
 )
 
 if ($null -ne $directoryToUse) {
-  $directoryToUse = $directoryToUse.Replace("`"","'")
+  $directoryToUse = $directoryToUse.Replace("`"", "'")
 }
 
 $ARTARRAY = @(
@@ -87,33 +87,34 @@ function Draw-Separator {
 
 #region FUNCTION Get-Files
 function Get-Files {
-  param($dir,$rec)
-  Get-ChildItem $dir -Include *.sm,*.ssc -Recurse:$rec
+  param($dir, $rec)
+  Get-ChildItem $dir -Include *.sm, *.ssc -Recurse:$rec
 }
 #endregion
 
 #region FUNCTION Update-Field-Capitalization, Update-Capitalization, Update-Capitalization-StepArtist
 # The result of the prompt is a global variable so it can be reused if Update-Capitalization-StepArtist is called.
 function Update-Field-Capitalization {
-  param($dir,$rec,$field)
+  param($dir, $rec, $field)
   Write-Host ""
   $changeField = Read-Host -Prompt "Would you like to change the $field field capitalization? (yes/no, default is no)"
   if ($changeField -eq 'yes') {
     $global:capitalizationPromptAnswer = Read-Host -Prompt "Please enter one of the following switches: u (uppercase), t (title case), l (lower case)"
-    if ($global:capitalizationPromptAnswer -notin @("u","t","l")) {
+    if ($global:capitalizationPromptAnswer -notin @("u", "t", "l")) {
       Write-Error "Invalid switch: $global:capitalizationPromptAnswer. Please provide one of the following switches: u (uppercase), t (title case), l (lower case)"
       return
     }
     if ($field -eq "STEPARTIST") {
       Update-Capitalization-StepArtist -StepArtist_dir $dir -StepArtist_rec $rec
-    } else {
+    }
+    else {
       Update-Capitalization -dir $dir -rec $rec -field $field -switch $global:capitalizationPromptAnswer
     }
   }
 }
 
 function Update-Capitalization {
-  param($dir,$rec,$field,$switch)
+  param($dir, $rec, $field, $switch)
   $files = Get-Files -dir $dir -rec $rec
   foreach ($file in $files) {
     $content = Get-Content -LiteralPath $file.FullName
@@ -136,7 +137,7 @@ function Update-Capitalization {
 }
 
 function Update-Capitalization-StepArtist {
-  param($StepArtist_dir,$StepArtist_rec)
+  param($StepArtist_dir, $StepArtist_rec)
   $StepArtist_files = Get-Files -dir $StepArtist_dir -rec $StepArtist_rec
   foreach ($StepArtist_file in $StepArtist_files) {
     $StepArtist_content = Get-Content -LiteralPath $StepArtist_file.FullName
@@ -144,9 +145,9 @@ function Update-Capitalization-StepArtist {
       if ($StepArtist_content[$i] -match "//---------------(dance-.*) - (.*?)----------------") {
         $matchedGroup = $Matches[2]
         switch ($global:capitalizationPromptAnswer) {
-          "u" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup,$matchedGroup.ToUpper()) }
-          "t" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup,(Get-Culture).TextInfo.ToTitleCase($matchedGroup.ToLower())) }
-          "l" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup,$matchedGroup.ToLower()) }
+          "u" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup, $matchedGroup.ToUpper()) }
+          "t" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup, (Get-Culture).TextInfo.ToTitleCase($matchedGroup.ToLower())) }
+          "l" { $StepArtist_content[$i] = $StepArtist_content[$i].Replace($matchedGroup, $matchedGroup.ToLower()) }
         }
       }
     }
@@ -157,13 +158,13 @@ function Update-Capitalization-StepArtist {
 
 #region FUNCTION Update-Content, Update-Offset, Update-File
 function Update-Content {
-  param($dir,$rec,$pattern,$replacement)
+  param($dir, $rec, $pattern, $replacement)
   $files = Get-Files -dir $dir -rec $rec
   foreach ($file in $files) {
     $content = Get-Content -LiteralPath $file.FullName
     for ($i = 0; $i -lt $content.Length; $i++) {
       if ($content[$i] -match $pattern) {
-        $content[$i] = $content[$i] -replace $pattern,$replacement
+        $content[$i] = $content[$i] -replace $pattern, $replacement
         break
       }
     }
@@ -172,7 +173,7 @@ function Update-Content {
 }
 
 function Update-Offset {
-  param($dir,$rec)
+  param($dir, $rec)
   $files = Get-Files -dir $dir -rec $rec
   $operation = Read-Host "Do you want to add or subtract the 9ms ITG offset? (add/subtract/no)"
   $adjustment = switch ($operation) {
@@ -207,35 +208,35 @@ function Update-Offset {
 }
 
 function Update-File {
-    param($file, $operations)
-    $content = Get-Content -LiteralPath $file.FullName
-    $contentModified = $false
+  param($file, $operations)
+  $content = Get-Content -LiteralPath $file.FullName
+  $contentModified = $false
 
-    foreach ($operation in $operations) {
-        $pattern = $operation.Pattern
-        $replacement = $operation.Replacement
-        $appendIfNotFound = $operation.AppendIfNotFound -or $false
+  foreach ($operation in $operations) {
+    $pattern = $operation.Pattern
+    $replacement = $operation.Replacement
+    $appendIfNotFound = $operation.AppendIfNotFound -or $false
 
-        $found = $false
-        for ($i = 0; $i -lt $content.Length; $i++) {
-            if ($content[$i] -match $pattern) {
-                Write-Host "Replacing '$($content[$i])' with '$replacement'"
-                $content[$i] = $content[$i] -replace $pattern, $replacement
-                $found = $true
-                $contentModified = $true
-            }
-        }
-
-        if ($appendIfNotFound -and -not $found) {
-            Write-Host "Appending '$replacement' to the file."
-            $content += $replacement
-            $contentModified = $true
-        }
+    $found = $false
+    for ($i = 0; $i -lt $content.Length; $i++) {
+      if ($content[$i] -match $pattern) {
+        Write-Host "Replacing '$($content[$i])' with '$replacement'"
+        $content[$i] = $content[$i] -replace $pattern, $replacement
+        $found = $true
+        $contentModified = $true
+      }
     }
 
-    if ($contentModified) {
-        Set-Content -LiteralPath $file.FullName -Value $content
+    if ($appendIfNotFound -and -not $found) {
+      Write-Host "Appending '$replacement' to the file."
+      $content += $replacement
+      $contentModified = $true
     }
+  }
+
+  if ($contentModified) {
+    Set-Content -LiteralPath $file.FullName -Value $content
+  }
 }
 
 #endregion
@@ -287,13 +288,16 @@ function Remove-OldFiles {
           Remove-Item -Path $oldFile.FullName
         }
         Write-Host "All .old files have been removed."
-      } else {
+      }
+      else {
         Write-Host "No files were removed."
       }
-    } else {
+    }
+    else {
       Write-Host "No files were removed."
     }
-  } else {
+  }
+  else {
     Write-Host "No .old files found in `"$targetDir`"."
   }
 }
@@ -301,19 +305,20 @@ function Remove-OldFiles {
 
 #region FUNCTION Prepare-Filenames-For-Filesharing
 function Prepare-Filenames-For-Filesharing {
-  param($dir,$rec)
+  param($dir, $rec)
   # If I missed any file types that we should look for, they can be added here.
-  $files = Get-ChildItem $dir -Include *.sm,*.ssc,*.mp3,*.ogg,*.png,*.gif,*.jpg,*.jpeg -Recurse:$rec
+  $files = Get-ChildItem $dir -Include *.sm, *.ssc, *.mp3, *.ogg, *.png, *.gif, *.jpg, *.jpeg -Recurse:$rec
 
   # First, rename all the files in the directory
   $renamedFiles = @{}
   foreach ($file in $files) {
-    $newFileName = $file.Name -replace '[^a-zA-Z0-9._]','_'
+    $newFileName = $file.Name -replace '[^a-zA-Z0-9._]', '_'
     try {
       Rename-Item -LiteralPath $file.FullName -NewName $newFileName -ErrorAction Stop
       $renamedFiles[$file.FullName] = Join-Path $file.Directory $newFileName
       Write-Host "Renamed file '$($file.FullName)' to '$newFileName'"
-    } catch {
+    }
+    catch {
       Write-Warning "Failed to rename file '$($file.FullName)' to '$newFileName'. Error: $_"
       Write-Warning "Values in the simfile will not be changed."
       return
@@ -321,15 +326,15 @@ function Prepare-Filenames-For-Filesharing {
   }
 
   # Refresh the $files variable
-  $files = Get-ChildItem $dir -Include *.sm,*.ssc,*.mp3,*.ogg,*.png,*.gif,*.jpg,*.jpeg -Recurse:$rec
+  $files = Get-ChildItem $dir -Include *.sm, *.ssc, *.mp3, *.ogg, *.png, *.gif, *.jpg, *.jpeg -Recurse:$rec
 
   # Then, update the references in each file
   foreach ($file in $files) {
     $content = Get-Content -LiteralPath $file.FullName
     $content = $content | ForEach-Object {
       if ($_ -match "#MUSIC" -or $_ -match "#BANNER" -or $_ -match "#BACKGROUND" -or $_ -match "#CDTITLE") {
-        $parts = $_ -split ':',2
-        $parts[1] = $parts[1].TrimStart().Replace(' ','_')
+        $parts = $_ -split ':', 2
+        $parts[1] = $parts[1].TrimStart().Replace(' ', '_')
         $_ = $parts -join ':'
       }
       $_
@@ -368,7 +373,7 @@ Write-Host "To ensure compatibility with all versions of StepMania/ITG, you can 
 Write-Host ""
 $encoding = [System.Text.Encoding]::GetEncoding('iso-8859-1')
 $unicodeCheckParams = @{
-  Prompt = 'Would you like to check for Unicode characters? (yes/no, default is no)'
+  Prompt         = 'Would you like to check for Unicode characters? (yes/no, default is no)'
   AsSecureString = $false
 }
 $unicodeCheckInput = Read-Host @unicodeCheckParams
@@ -385,10 +390,12 @@ if ($unicodeCheckInput -eq 'yes') {
 
   if ($nonUnicodeCompliantFiles.Count -eq 0) {
     Write-Host "Check completed successfully. No problematic characters were found."
-  } else {
+  }
+  else {
     $nonUnicodeCompliantFiles
   }
-} else {}
+}
+else {}
 
 Draw-Separator
 #endregion
@@ -451,7 +458,7 @@ if ($wannaModify -eq 'yes') {
   if ($setStepArtist -eq 'yes') {
     $stepArtist = Read-Host -Prompt 'Enter the credit value'
     <# To-do: add more chart types below (pump, smx, etc) #>
-    $danceTypes = @("dance-single","dance-double","dance-couple","dance-solo")
+    $danceTypes = @("dance-single", "dance-double", "dance-couple", "dance-solo")
     foreach ($danceType in $danceTypes) {
       $operations += @{ Pattern = "//--------------- $danceType - (.*?) ----------------"; Replacement = "//--------------- $danceType - $stepArtist ----------------" }
     }
@@ -464,12 +471,12 @@ if ($wannaModify -eq 'yes') {
     $operations += @{ Pattern = '^#CREDIT:.*?;'; Replacement = "#CREDIT:$creditValue;" }
   }
 
-    Write-Host ""
-    $addGenre = Read-Host -Prompt 'Would you like to apply a genre to these files? (yes/no, default is no)'
-    if ($addGenre -eq 'yes') {
-        $GenrePrompt = Read-Host -Prompt 'Enter the genre'
-        $operations += @{ Pattern = '^#GENRE:.*?;'; Replacement = "#GENRE:$GenrePrompt;"; AppendIfNotFound = $true }
-    }
+  Write-Host ""
+  $addGenre = Read-Host -Prompt 'Would you like to apply a genre to these files? (yes/no, default is no)'
+  if ($addGenre -eq 'yes') {
+    $GenrePrompt = Read-Host -Prompt 'Enter the genre'
+    $operations += @{ Pattern = '^#GENRE:.*?;'; Replacement = "#GENRE:$GenrePrompt;"; AppendIfNotFound = $true }
+  }
 
   $files = Get-Files -dir $directoryToUse -Recurse $recurse
   Write-Host ""
@@ -480,7 +487,8 @@ if ($wannaModify -eq 'yes') {
       Write-Host "Applying changes to file: $($file.FullName)"
       Update-File -File $file -operations $operations
     }
-  } else {
+  }
+  else {
     Write-Host "No changes were made."
   }
 }
@@ -492,7 +500,8 @@ Draw-Separator
 $oldFilesConfirm = Read-Host -Prompt 'Would you like to check for .old files and remove them if found? (yes/no, default is no)'
 if ($oldFilesConfirm -eq 'yes') {
   Remove-OldFiles -targetDir $directoryToUse -Recurse $recurse
-} else {
+}
+else {
   Write-Host ""
 }
 
@@ -513,7 +522,8 @@ Write-Host $renameFilesForSharingMessage
 $renameFilesForSharingConfirm = Read-Host -Prompt 'Would you like to check for spaces and special characters and rename the files? (yes/no, default is no)'
 if ($renameFilesForSharingConfirm -eq 'yes') {
   Prepare-Filenames-For-Filesharing -dir $directoryToUse -rec $recurse
-} else {
+}
+else {
   Write-Host ""
 }
 Draw-Separator
