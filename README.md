@@ -2,6 +2,8 @@
 
 # The simfile tool :)
 
+[![PSScriptAnalyzer](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml/badge.svg?branch=main&event=push)](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml)
+
 ### This is a PowerShell script. Windows users already have PowerShell on their computer. Mac and Linux users can easily install it - instructions are below.
 
   -----
@@ -29,10 +31,16 @@ You can run Simfile Tool directly as a PowerShell script. You need to tell it th
 simfile-tool.ps1 "C:\Games\ITGmania\Songs\StepMania 5"
 ```
 
-- **Windows**: If you can't run the ps1 script in a PowerShell window, you need to enable execution of PowerShell scripts to run the .ps1 file. If you need to allow the operation of scripts, open a PowerShell window as admin and run the following command: 
+- **Windows**: To run a script once without changing system-wide policy:
 ```
-- Set-ExecutionPolicy -ExecutionPolicy Bypass -Scope Process
+powershell.exe -ExecutionPolicy Bypass -File .\yourscript.ps1
 ```
+
+Alternately, you can allow script system-wide:
+```
+Set-ExecutionPolicy Bypass -Scope LocalMachine
+```
+
 After running the script, you can set it back to the default Windows 11 mode like so:
 ```
 Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope LocalMachine
@@ -44,7 +52,7 @@ Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope LocalMachine
  
 ------
 
-There are certain limitations to PowerShell. It is very powerful and flexible but its main weakness is its inability to handle the `[` or `]` characters.
+There are certain limitations to PowerShell. Its main weakness is its inability to handle the `[` or `]` characters.
 
 - Non-Unicode characters may get broken when using the auto capitalization feature.
 - Directories containing the `[` or `]` characters may result in errors (a warning will be displayed if these are detected when the program is run). It is not recommended to use these characters in the file path if you can help it as they are likely to be problematic in any sort of  command-line tools on any OS.
