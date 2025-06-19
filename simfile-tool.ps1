@@ -15,39 +15,7 @@ if ($null -ne $directoryToUse) {
   $directoryToUse = $directoryToUse.Replace("`"", "'")
 }
 
-$ARTARRAY = @(
-    @(
-        "                                                ",
-        "             (       (           )         (   ",
-        "   (     )   )\ ) (  )\  (    ( /(         )\  ",
-        " ( )\   (   (()/( )\((_)))\   )\())(    ( ((_) ",
-        " )((_)  )\  '/(_)|(_)_ /((_) (_))/ )\   )\ _   ",
-        "((_|_)_((_))(_) _|(_) (_))   | |_ ((_) ((_) |  ",
-        "(_-< | '  \()|  _|| | / -_)  |  _/ _ \/ _ \ |  ",
-        "/__/_|_|_|_| |_|  |_|_\___|   \__\___/\___/_|  "
-    ),
-    @(
-        "                      _                _",
-        "                /)   //     _/_       //",
-        " _   o ______  // o // _    /  __ __ //",
-        "/_)_<_/ / / <_//_<_</_</_  <__(_)(_)</_",
-        "             />",
-        "            </"
-    ),
-    @(
-        "____ _ _  _ ____ _ _    ____    ___ ____ ____ _    ",
-        "[__  | |\/| |___ | |    |___     |  |  | |  | |    ",
-        "___] | |  | |    | |___ |___     |  |__| |__| |___"
-    )
-)
-
-$randomArt = Get-Random -InputObject $ARTARRAY
-
-foreach ($line in $randomArt) {
-    Write-Host $line
-}
-
-Write-Host " ~ Version 8/20/2024 ~"
+Write-Host " ~ Version 8/20/2024 v2 ~"
 Write-Host "Check for new versions at:"
 Write-Host "https://github.com/sukibaby/simfile-tool"
 Write-Host ""
@@ -532,9 +500,4 @@ Draw-Separator
 #region END OF PROGRAM
 # Tell the user everything succeeded.
 Write-Host "All done :)"
-Write-Host ""
-Write-Host "~hint~ If you're finalizing a pack, here is an easy way to normalize a batch of audio files:"
-Write-Host "https://www.youtube.com/watch?v=ML7YkFLlL1U"
-Write-Host "You can use the 'Batch File/Item Converter' to normalize all your oggs volumes at once ;)"
-Write-Host ""
 #endregion
