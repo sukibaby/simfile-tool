@@ -1,61 +1,75 @@
 
 
-# The simfile tool :)
+
+# The simfile tool :-)
 
 [![PSScriptAnalyzer](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml/badge.svg?branch=main&event=push)](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml)
 
-### This is a PowerShell script. Windows users already have PowerShell on their computer. Mac and Linux users can easily install it - instructions are below.
+You will need PowerShell installed to run this script.
 
-  -----
+### Features:
 
-*With this program, you can do many useful operations related to organization or preparation for pack release, such as:*
-
-1.	File Operations:
-•	Retrieve simfiles (`*.sm`, `*.ssc`) from the specified directory.
-•	Update specific patterns in the simfiles.
-•	Apply or remove the 9ms ITG offset.
-•	Delete old backup files (*.old) from the directory.
-2.	Field Management:
-•	Change the capitalization of specific fields in the simfiles.
-•	Change the values of various fields (for example, `#BANNER`, `#GENRE`, or the per-chart Credit field)
-3.	File Path Checks:
-•	Check for special characters in file paths that might cause issues in PowerShell.
-4.	File Renaming for File Sharing:
-•	Rename files to remove special characters and updates references within the files.
+ - Retrieve simfiles (`*.sm`, `*.ssc`) from the specified directory.
+ -    Update specific patterns in the simfiles. 
+ - Apply or remove the 9ms ITG   offset. 
+ -    Delete old backup files (*.old) from the directory. 
+ -    Change   the capitalization of specific fields in the simfiles. 
+ -    Change the   values of various fields (for example, `#BANNER`, `#GENRE`, or the
+   per-chart Credit field) 
+   - Check for special characters in file paths   that might cause various issues. 
+   - Rename files to remove special   characters and updates references within the files.
 
 -----
 ### How to use
-You can run Simfile Tool directly as a PowerShell script. You need to tell it the path of the folder you want to work with. For example:
 
+You can run Simfile Tool directly as a PowerShell script. You need to tell it the path of the folder you want to work with. 
+
+If you are on Windows, you already have PowerShell installed.
+
+![image](https://github.com/user-attachments/assets/c470011f-4aa5-4bab-bd99-b57d137db525)
+
+
+If you are on Mac or Linux, you will need to install PowerShell.
+
+There are many valid and correct ways to install PowerShell. Any method you choose will allow you to use this script.
+
+ - https://learn.microsoft.com/en-us/powershell/scripting/install/installing-powershell?view=powershell-7.4
+ -    https://github.com/PowerShell/powershell/releases
+
+### Usage
+
+Simply run `simfile-tool.ps1` and then tell it which directory you want to work with.
+If you wanted to modify the StepMania 5 song folder:
 ```
 simfile-tool.ps1 "C:\Games\ITGmania\Songs\StepMania 5"
 ```
 
-- **Windows**: To run a script once without changing system-wide policy:
-```
-powershell.exe -ExecutionPolicy Bypass -File .\yourscript.ps1
-```
+### Allowing scripts on Windows
 
-Alternately, you can allow script system-wide:
+By default, Windows does not let you run scripts from sources it does not recognize.
+
+The easiest way is to allow scripts.  Open a PowerShell window as Administrator and run the following command.
+
 ```
 Set-ExecutionPolicy Bypass -Scope LocalMachine
 ```
 
-After running the script, you can set it back to the default Windows 11 mode like so:
+
+
+
+
+The following command will restore the original Windows settings blocking scripts:
 ```
 Set-ExecutionPolicy -ExecutionPolicy Restricted -Scope LocalMachine
 ```
 
-- **Mac**: Mac users can download PowerShell from the Microsoft website or with Homebrew.
+It's also possible to run it without changing the system policy like so:
+```
+powershell.exe -ExecutionPolicy Bypass -File .\simfile-tool.ps1 "C:\Games\ITGmania\Songs\StepMania 5"
+```
 
-- **Linux**: Linux users can refer to their distribution's instructions for the preferred method.
- 
-------
 
-There are certain limitations to PowerShell. Its main weakness is its inability to handle the `[` or `]` characters.
+### Known problems
 
+- The `[` or `]` characters should not be used in file names because they cause problems with various tools, including this script.
 - Non-Unicode characters may get broken when using the auto capitalization feature.
-- Directories containing the `[` or `]` characters may result in errors (a warning will be displayed if these are detected when the program is run). It is not recommended to use these characters in the file path if you can help it as they are likely to be problematic in any sort of  command-line tools on any OS.
-
-
-*If you run into any issues, or have any suggestions, please note them on the Issues section!*
