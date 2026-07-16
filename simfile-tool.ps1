@@ -280,8 +280,7 @@ function Prepare-Filenames-For-Filesharing {
   $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
 
   Write-Host ""
-  Write-Host "Warning: renaming these files will change their names, but the references inside the simfiles will not be updated automatically."
-  Write-Host "You will need to manually update the contents of the affected files to reflect the new names."
+  Write-Host "Warning: if you continue, this will rename files AND change file contents, this can't be undone."
   $confirmRename = Read-Host -Prompt 'Continue with renaming files? (yes/no, default is no)'
   if ($confirmRename -ne 'yes') {
     Write-Host "No files were renamed."
