@@ -1,11 +1,15 @@
-
-
-
 # The simfile tool :-)
 
 [![PSScriptAnalyzer](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml/badge.svg?branch=main&event=push)](https://github.com/sukibaby/simfile-tool/actions/workflows/powershell.yml)
 
 This script is designed to automate the most tedious and error-prone processes of preparing a StepMania pack for release! It is also equally useful for people looking to make bulk edits to existing simfiles.
+
+***Click [here](https://raw.githubusercontent.com/sukibaby/simfile-tool/refs/heads/main/simfile-tool.ps1), save the script to your computer, and run it! [PowerShell](https://learn.microsoft.com/en-us/powershell/) is required.***
+
+***Run `simfile-tool.ps1` followed by the path to the files. For example:***
+```
+simfile-tool.ps1 "C:\Games\ITGmania\Songs\StepMania 5"
+```
 
 ### Features include:
 
@@ -14,17 +18,6 @@ This script is designed to automate the most tedious and error-prone processes o
  - Apply or remove the 9ms ITG offset quickly.
  - Identify & replace problematic characters in filenames which could cause problems on certain operating systems.
  - Help clean up and prepare your song folders for release with file renaming, compatibility checks, and automatic cleanup of `*.old` files.
-
-## How to use
-
-The Simfile Tool (`simfile-tool.ps1`) is a [PowerShell](https://learn.microsoft.com/en-us/powershell/) script. 
-
-Simply run `simfile-tool.ps1` and then tell it which directory you want to work with.
-
-For example, if you wanted to modify the contents of the StepMania 5 song folder:
-```
-simfile-tool.ps1 "C:\Games\ITGmania\Songs\StepMania 5"
-```
 
 ## Known issues
 
