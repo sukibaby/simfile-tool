@@ -15,11 +15,10 @@ if ($null -ne $directoryToUse) {
   $directoryToUse = $directoryToUse.Replace("`"", "'")
 }
 
-Write-Host " ~ Version 8/20/2024 v2 ~"
-Write-Host "Check for new versions at:"
+Write-Host " ~ Version 7/15/2026 ~"
 Write-Host "https://github.com/sukibaby/simfile-tool"
 Write-Host ""
-Write-Host "Be sure to make a backup of your files first."
+Write-Host "Be sure to make a backup of your files first!"
 Write-Host ""
 
 #endregion
@@ -43,6 +42,9 @@ $directoryToUse = Get-Directory -dir $directoryToUse
 if ($null -eq $directoryToUse) {
   return
 }
+
+$script:simfileExtensions = @('*.sm', '*.ssc')
+$script:allExtensions = @('*.sm', '*.ssc', '*.mp3', '*.ogg', '*.png', '*.gif', '*.jpg', '*.jpeg', '*.bmp', '*.sma', '*.wav')
 #endregion
 
 #region FUNCTION Draw-Separator
@@ -55,8 +57,8 @@ function Draw-Separator {
 
 #region FUNCTION Get-Files
 function Get-Files {
-  param($dir, $rec)
-  Get-ChildItem $dir -Include *.sm, *.ssc -Recurse:$rec
+  param($dir, $rec, [string[]]$extensions = $script:simfileExtensions)
+  Get-ChildItem $dir -Include $extensions -Recurse:$rec
 }
 #endregion
 
@@ -143,7 +145,7 @@ function Update-Content {
 function Update-Offset {
   param($dir, $rec)
   $files = Get-Files -dir $dir -rec $rec
-  $operation = Read-Host "Do you want to add or subtract the 9ms ITG offset? (add/subtract/no)"
+  $operation = Read-Host "Do you want to add or subtract the 9ms ITG offset? (add/subtract/no, default is no)"
   $adjustment = switch ($operation) {
     "add" { 0.009 }
     "subtract" { -0.009 }
@@ -275,7 +277,16 @@ function Remove-OldFiles {
 function Prepare-Filenames-For-Filesharing {
   param($dir, $rec)
   # If I missed any file types that we should look for, they can be added here.
-  $files = Get-ChildItem $dir -Include *.sm, *.ssc, *.mp3, *.ogg, *.png, *.gif, *.jpg, *.jpeg -Recurse:$rec
+  $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
+
+  Write-Host ""
+  Write-Host "Warning: renaming these files will change their names, but the references inside the simfiles will not be updated automatically."
+  Write-Host "You will need to manually update the contents of the affected files to reflect the new names."
+  $confirmRename = Read-Host -Prompt 'Continue with renaming files? (yes/no, default is no)'
+  if ($confirmRename -ne 'yes') {
+    Write-Host "No files were renamed."
+    return
+  }
 
   # First, rename all the files in the directory
   $renamedFiles = @{}
@@ -294,7 +305,7 @@ function Prepare-Filenames-For-Filesharing {
   }
 
   # Refresh the $files variable
-  $files = Get-ChildItem $dir -Include *.sm, *.ssc, *.mp3, *.ogg, *.png, *.gif, *.jpg, *.jpeg -Recurse:$rec
+  $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
 
   # Then, update the references in each file
   foreach ($file in $files) {
@@ -502,26 +513,4 @@ Draw-Separator
 Write-Host "All done :)"
 #endregion
 
-<#
-MIT License
-
-Copyright (c) 2025 sukibaby
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
-#>
+<# This script is public domain via the Unlicense, see the text of the Unlicense for more details. #>
