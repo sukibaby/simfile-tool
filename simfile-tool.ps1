@@ -273,55 +273,6 @@ function Remove-OldFiles {
 }
 #endregion
 
-#region FUNCTION Prepare-Filenames-For-Filesharing
-function Prepare-Filenames-For-Filesharing {
-  param($dir, $rec)
-  # If I missed any file types that we should look for, they can be added here.
-  $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
-
-  Write-Host ""
-  Write-Host "Warning: if you continue, this will rename files AND change file contents, this can't be undone."
-  $confirmRename = Read-Host -Prompt 'Continue with renaming files? (yes/no, default is no)'
-  if ($confirmRename -ne 'yes') {
-    Write-Host "No files were renamed."
-    return
-  }
-
-  # First, rename all the files in the directory
-  $renamedFiles = @{}
-  foreach ($file in $files) {
-    $newFileName = $file.Name -replace '[^a-zA-Z0-9._]', '_'
-    try {
-      Rename-Item -LiteralPath $file.FullName -NewName $newFileName -ErrorAction Stop
-      $renamedFiles[$file.FullName] = Join-Path $file.Directory $newFileName
-      Write-Host "Renamed file '$($file.FullName)' to '$newFileName'"
-    }
-    catch {
-      Write-Warning "Failed to rename file '$($file.FullName)' to '$newFileName'. Error: $_"
-      Write-Warning "Values in the simfile will not be changed."
-      return
-    }
-  }
-
-  # Refresh the $files variable
-  $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
-
-  # Then, update the references in each file
-  foreach ($file in $files) {
-    $content = Get-Content -LiteralPath $file.FullName
-    $content = $content | ForEach-Object {
-      if ($_ -match "#MUSIC" -or $_ -match "#BANNER" -or $_ -match "#BACKGROUND" -or $_ -match "#CDTITLE") {
-        $parts = $_ -split ':', 2
-        $parts[1] = $parts[1].TrimStart().Replace(' ', '_')
-        $_ = $parts -join ':'
-      }
-      $_
-    }
-    Set-Content -LiteralPath $file.FullName -Value $content
-  }
-}
-#endregion
-
 #region USER INPUT Get Subdirectory Query
 $recursePrompt = Read-Host -Prompt "Do you want to search in subdirectories as well? (yes/no, default is yes)"
 $recurseOption = $recursePrompt -ne "no"
@@ -486,30 +437,80 @@ else {
 Draw-Separator
 #endregion
 
-#region USER INPUT Portable Filenames
-$wannaMessage = @"
-  The following section changes the text values inside the simfile. It won't
-  move any files. For example, if you plan to have a banner called 'banner.png'
-  in all your song directories, you would enter banner.png when prompted. You
-  can change the banner, CD title, background, step artist, and credit fields
-  here.
-
-"@
-
-Write-Host $renameFilesForSharingMessage
-$renameFilesForSharingConfirm = Read-Host -Prompt 'Would you like to check for spaces and special characters and rename the files? (yes/no, default is no)'
-if ($renameFilesForSharingConfirm -eq 'yes') {
-  Prepare-Filenames-For-Filesharing -dir $directoryToUse -rec $recurse
-}
-else {
-  Write-Host ""
-}
-Draw-Separator
-#endregion
-
 #region END OF PROGRAM
 # Tell the user everything succeeded.
 Write-Host "All done :)"
 #endregion
+
+## Deprecated Functions (unmaintained) ##
+<#
+# NOTE: When reading over the script for the first time in a long time i felt like this
+# function just kinda sucks and isn't as good as it could be. However maybe someone
+# really still wants this so I'm at least leaving it in the script. I wrote it to prepare
+# filesnames for being sent over Discord, but it doesn't properly update simfile entries
+# if they contain symbols (e.g. Goin' Under.ogg becomes Goin__Under.ogg, but the simfile's
+# #MUSIC tag would be updated to Goin'__Under.ogg).
+# You can uncomment the following section to enable this functionality.
+# function Prepare-Filenames-For-Filesharing {
+# param($dir, $rec)
+# # If I missed any file types that we should look for, they can be added here.
+# $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
+# Write-Host ""
+# Write-Host "Warning: if you continue, this will rename files AND change file contents, this can't be undone."
+# $confirmRename = Read-Host -Prompt 'Continue with renaming files? (yes/no, default is no)'
+# if ($confirmRename -ne 'yes') {
+#   Write-Host "No files were renamed."
+#   return
+# }
+# # First, rename all the files in the directory
+# $renamedFiles = @{}
+# foreach ($file in $files) {
+#   $newFileName = $file.Name -replace '[^a-zA-Z0-9._]', '_'
+#   try {
+#     Rename-Item -LiteralPath $file.FullName -NewName $newFileName -ErrorAction Stop
+#     $renamedFiles[$file.FullName] = Join-Path $file.Directory $newFileName
+#     Write-Host "Renamed file '$($file.FullName)' to '$newFileName'"
+#   }
+#   catch {
+#     Write-Warning "Failed to rename file '$($file.FullName)' to '$newFileName'. Error: $_"
+#     Write-Warning "Values in the simfile will not be changed."
+#     return
+#   }
+# }
+# # Refresh the $files variable
+# $files = Get-Files -dir $dir -rec $rec -extensions $script:allExtensions
+# # Then, update the references in each file
+# foreach ($file in $files) {
+#   $content = Get-Content -LiteralPath $file.FullName
+#   $content = $content | ForEach-Object {
+#     if ($_ -match "#MUSIC" -or $_ -match "#BANNER" -or $_ -match "#BACKGROUND" -or $_ -match "#CDTITLE") {
+#       $parts = $_ -split ':', 2
+#       $parts[1] = $parts[1].TrimStart().Replace(' ', '_')
+#       $_ = $parts -join ':'
+#     }
+#     $_
+#   }
+#   Set-Content -LiteralPath $file.FullName -Value $content
+# }
+# }
+# #region USER INPUT Portable Filenames
+# $wannaMessage = @"
+# The following section changes the text values inside the simfile. It won't
+# move any files. For example, if you plan to have a banner called 'banner.png'
+# in all your song directories, you would enter banner.png when prompted. You
+# can change the banner, CD title, background, step artist, and credit fields
+# here.
+# "@
+# Write-Host $renameFilesForSharingMessage
+# $renameFilesForSharingConfirm = Read-Host -Prompt 'Would you like to check for spaces and special characters and rename the files? (yes/no, default is no)'
+# if ($renameFilesForSharingConfirm -eq 'yes') {
+# Prepare-Filenames-For-Filesharing -dir $directoryToUse -rec $recurse
+# }
+# else {
+# Write-Host ""
+# }
+# Draw-Separator
+# #endregion
+#>
 
 <# This script is public domain via the Unlicense, see the text of the Unlicense for more details. #>
